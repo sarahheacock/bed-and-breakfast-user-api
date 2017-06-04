@@ -10,7 +10,7 @@ var logger = require("morgan");
 
 app.use(logger("dev"));
 app.use(jsonParser());
-mongoose.connect("mongodb://localhost:27017/user");
+mongoose.connect('mongodb://heroku_txrpvqtk:rh0931h9dff6bimb8a5lglbsg8@ds161901.mlab.com:61901/heroku_txrpvqtk');
 
 var db = mongoose.connection;
 
