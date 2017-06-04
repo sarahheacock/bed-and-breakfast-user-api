@@ -9,9 +9,10 @@ router.param("userID", function(req, res, next, id){
   User.findOne({email: id}).exec(function(err, doc){
     if(err) return next(err);
     if(!doc){
-      err = new Error("Not Found");
-      err.status = 404;
-      return next(err);
+      // err = new Error("Not Found");
+      // err.status = 404;
+      // return next(err);
+      req.user = {"email": "Email Not Found", "password": "Incorrect Password"};
     }
     req.user = doc;
     return next();
@@ -51,7 +52,8 @@ router.post("/", function(req, res, next){
 });
 
 //get user information
-router.get("/:userID", function(req, res, next){
+router.get("/:userID/password", function(req, res, next){
+  if(req.user.password !== req.params.password) res.json({"email": req.user.email, "password":"Incorrect Password"})
   res.json(req.user);
 });
 
