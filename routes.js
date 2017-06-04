@@ -9,14 +9,22 @@ router.param("userID", function(req, res, next, id){
   User.findOne({email: id}).exec(function(err, doc){
     if(err) return next(err);
     if(!doc){
-      // err = new Error("Not Found");
-      // err.status = 404;
-      // return next(err);
-      req.user = {"email": "Email Not Found", "password": "Incorrect Password"};
+      err = new Error("Email Not Found");
+      err.status = 404;
+      return next(err);
     }
     req.user = doc;
     return next();
   });
+});
+
+router.param("password", function(req, res, next, id){
+  if(req.user.password !== id){
+    var err = new Error("Password Not Found");
+    err.status = 404;
+    return next(err);
+  }
+  return next();
 });
 
 router.param("upcomingID", function(req,res,next,id){
@@ -52,13 +60,12 @@ router.post("/", function(req, res, next){
 });
 
 //get user information
-router.get("/:userID/password", function(req, res, next){
-  if(req.user.password !== req.params.password) res.json({"email": req.user.email, "password":"Incorrect Password"})
+router.get("/:userID/:password", function(req, res, next){
   res.json(req.user);
 });
 
 //make new reservation
-router.post("/:userID/upcoming", function(req, res, next){
+router.post("/:userID/:password/upcoming", function(req, res, next){
   req.user.upcoming.push(req.body);
   req.user.save(function(err, user){
     if(err) return next(err);
@@ -76,7 +83,7 @@ router.post("/:userID/upcoming", function(req, res, next){
 // });
 
 //cancel reservation
-router.delete("/:userID/upcoming/:upcomingID", function(req, res){
+router.delete("/:userID/:password/upcoming/:upcomingID", function(req, res){
   req.upcoming.remove(function(err){
     req.user.save(function(err, user){
       if(err) return next(err);

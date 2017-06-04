@@ -32,14 +32,7 @@ UpcomingSchema.method("update", function(updates, callback){
 var UserSchema = new Schema({
   email: String,
   password: String,
-  billing: {
-    line1: String,
-    line2: String,
-    city: String,
-    state: String,
-    zip: String,
-    country: String,
-  },
+  billing: String,
   upcoming: [UpcomingSchema],
 });
 
