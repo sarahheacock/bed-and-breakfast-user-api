@@ -1,5 +1,6 @@
 'use strict';
 
+var bcrypt = require("bcrypt");
 var express = require("express");
 var router = express.Router();
 var User = require("./models").User;
@@ -19,12 +20,14 @@ router.param("userID", function(req, res, next, id){
 });
 
 router.param("password", function(req, res, next, id){
-  if(req.user.password !== id){
-    var err = new Error("Password Not Found");
-    err.status = 404;
-    return next(err);
-  }
-  return next();
+  bcrypt.compare(id, req.user.password, function(error, result){
+    if(result === false){
+      var err = new Error("Incorrect Password");
+      err.status = 404;
+      return next(err);
+    }
+    return next();
+  });
 });
 
 router.param("upcomingID", function(req,res,next,id){
@@ -56,6 +59,18 @@ router.post("/", function(req, res, next){
     if(err) return next(err);
     res.status(201);
     res.json(user);
+  });
+});
+
+router.get('/:id', function(req, res, next){
+  User.findById(req.params.id, function(err, doc){
+    if(err) return next(err);
+    if(!doc){
+      err = new Error("User Not Found");
+      err.status = 404;
+      return next(err);
+    }
+    res.json(doc);
   });
 });
 

@@ -1,8 +1,7 @@
 'use strict';
 
-var RoomList = require('./data/roomList');
-
 var mongoose = require("mongoose");
+var bcrypt = require("bcrypt");
 var Schema = mongoose.Schema;
 
 const temp = new Date().toString().split(' ');
@@ -30,15 +29,35 @@ UpcomingSchema.method("update", function(updates, callback){
 
 
 var UserSchema = new Schema({
-  email: String,
-  password: String,
-  billing: String,
+  email: {
+    type: String,
+    unique: true,
+    required: true,
+    trim: true
+  },
+  password: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  billing: {
+    type: String,
+    required: true,
+    trim: true
+  },
   upcoming: [UpcomingSchema],
 });
 
 UserSchema.pre("save", function(next){
   this.upcoming.sort(sortUpcoming);
-  next();
+  var user = this;
+  bcrypt.hash(user.password, 10, function(err, hash) {
+    if (err) {
+      return next(err);
+    }
+    user.password = hash;
+    next();
+  })
 });
 
 var User = mongoose.model("User", UserSchema);
