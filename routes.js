@@ -6,6 +6,19 @@ var router = express.Router();
 var User = require("./models").User;
 
 router.param("userID", function(req, res, next, id){
+  User.findById(id, function(err, doc){
+    if(err) return next(err);
+    if(!doc){
+      err = new Error("User Not Found");
+      err.status = 404;
+      return next(err);
+    }
+    req.user = doc;
+    return next();
+  });
+})
+
+router.param("email", function(req, res, next, id){
   //User.findById(id, function(err, doc){
   User.findOne({email: id}).exec(function(err, doc){
     if(err) return next(err);
@@ -62,25 +75,17 @@ router.post("/", function(req, res, next){
   });
 });
 
-router.get('/:id', function(req, res, next){
-  User.findById(req.params.id, function(err, doc){
-    if(err) return next(err);
-    if(!doc){
-      err = new Error("User Not Found");
-      err.status = 404;
-      return next(err);
-    }
-    res.json(doc);
-  });
+router.get('/:userID', function(req, res, next){
+  res.json(req.user);
 });
 
 //get user information
-router.get("/:userID/:password", function(req, res, next){
+router.get("/authenticate/:email/:password", function(req, res, next){
   res.json(req.user);
 });
 
 //make new reservation
-router.post("/:userID/:password/upcoming", function(req, res, next){
+router.post("/:userID/upcoming", function(req, res, next){
   req.user.upcoming.push(req.body);
   req.user.save(function(err, user){
     if(err) return next(err);
@@ -98,7 +103,7 @@ router.post("/:userID/:password/upcoming", function(req, res, next){
 // });
 
 //cancel reservation
-router.delete("/:userID/:password/upcoming/:upcomingID", function(req, res){
+router.delete("/:userID/upcoming/:upcomingID", function(req, res){
   req.upcoming.remove(function(err){
     req.user.save(function(err, user){
       if(err) return next(err);
