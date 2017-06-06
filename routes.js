@@ -102,6 +102,10 @@ router.post("/:userID/upcoming", function(req, res, next){
 //   });
 // });
 
+router.get("/:userID/upcoming/:upcomingID", function(req, res){
+  res.json(req.upcoming);
+});
+
 //cancel reservation
 router.delete("/:userID/upcoming/:upcomingID", function(req, res){
   req.upcoming.remove(function(err){
